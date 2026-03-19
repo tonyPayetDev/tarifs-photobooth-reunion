@@ -98,10 +98,9 @@ bot.on('text', async (ctx) => {
 
     const response = await anthropic.messages.create({
       model:      'claude-opus-4-6',
-      max_tokens: 1024,
+      max_tokens: 4096,
       system:     SYSTEM_PROMPT,
       messages:   history,
-      thinking:   { type: 'adaptive' },
     });
 
     const reply = response.content.find((b) => b.type === 'text')?.text
@@ -109,13 +108,15 @@ bot.on('text', async (ctx) => {
 
     history.push({ role: 'assistant', content: reply });
 
-    await ctx.reply(reply, { parse_mode: 'Markdown' }).catch(() =>
-      // Fallback sans markdown si le formatage pose problème
-      ctx.reply(reply)
-    );
+    // Envoi sans Markdown pour éviter les erreurs de formatage
+    await ctx.reply(reply);
   } catch (error) {
-    console.error('Erreur Claude API:', error.message);
-    await ctx.reply('⚠️ Une erreur est survenue. Veuillez réessayer dans un instant.');
+    console.error('Erreur Claude API:', error.status, error.message);
+    try {
+      await ctx.reply(`⚠️ Erreur : ${error.message ?? 'Veuillez réessayer.'}`);
+    } catch (sendErr) {
+      console.error('Impossible d\'envoyer le message d\'erreur:', sendErr.message);
+    }
   }
 });
 
