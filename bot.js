@@ -1,3 +1,4 @@
+require('dotenv').config(); // Charge .env en développement local
 const { Telegraf } = require('telegraf');
 const Anthropic = require('@anthropic-ai/sdk');
 const express = require('express');
